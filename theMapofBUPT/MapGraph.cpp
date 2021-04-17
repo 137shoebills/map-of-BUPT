@@ -252,5 +252,6 @@ int* MapGraph::TSP(int rt,int n,int p[]) {
 }
 void MapGraph::OutWay(int rt,int x) {
 	Dijkstra(rt);
+	std::cout << 1 << std::endl;
 	return;
 }
