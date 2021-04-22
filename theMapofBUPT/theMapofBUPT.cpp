@@ -9,12 +9,10 @@ int main()
     MapGraph b;
     b.BuildGraph();
     std::cout << 1 << std::endl;
-    int x;
-    std::cin >> x;
-    b.Dijkstra(x);
-    std::cout << 2 << std::endl;
-    std::cin >> x;
-    std::cout << b.GetDis(x)<<std::endl;
+    int x,y;
+    std::cin >> x >> y; 
+    b.OutWay(x, y); 
+    return 0;
 }
 
 // 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单

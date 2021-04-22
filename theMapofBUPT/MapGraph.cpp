@@ -74,37 +74,40 @@ void MapGraph::BuildGraph() {
 		double vv = getDistance(a[x].cdx,a[x].cdy,a[y].cdx,a[y].cdy);
 		Init(x,y,vv);
 	}*/
+	std::ifstream mapin;
+	mapin.open("Map_Data.txt");
+	if (!mapin)return ;
 	int n1, n2, m,y1,y2,x1,x2;
-	std::cin >> n2;
+	mapin >> n2;
 	rds[1] = new Road[n2 + 10];
 	rdn[1] = n2;
 	for (int i = 0; i < n2; ++i) {//读入竖着的道路
 		int t;//id
-		std::cin >> x1 >> y1 >> y2 >> t;
+		mapin >> x1 >> y1 >> y2 >> t;
 		rds[1][i].y1 = y1;
 		rds[1][i].y2 = y2;
 		rds[1][i].x1 = x1;
 		rds[1][i].x2 = x1;
 	}
-	std::cin >> n1;
+	mapin >> n1;
 	rds[0] = new Road[n1+10];
 	rdn[0] = n1;
 	for (int i = 0;i<n1; ++i) {//读入横着的道路
 		int t;//id
-		std::cin >> y1 >> x1 >> x2 >> t;
+		mapin >> y1 >> x1 >> x2 >> t;
 		rds[0][i].x1 = x1;
 		rds[0][i].x2 = x2;
 		rds[0][i].y1 = y1;
 		rds[0][i].y2 = y1;
 	}
-	std::cin >> m;
+	mapin >> m;
 	arch = new Architecture[m+10];
 	archn = m;
-	char name[30]; int q;
+	char name[50]; int q;
 	int n4 = 0;//n4为建筑物上的点的个数
 	for (int i = 0; i < m; ++i){ //读入建筑上的门
 		int t;
-		std::cin >>t >> name >> q ;
+		mapin >> t >> name >> q;
 		int id, side,type;
 		double ct;
 		arch[i].q = q;
@@ -113,9 +116,9 @@ void MapGraph::BuildGraph() {
 		arch[i].ct = new double[q];
 		arch[i].type = new int[q];
 		for (int j = 0; j < q; ++j) {
-			std::cin >> id >> type >> side >> ct;
+			mapin >> type >> id >> side >> ct;
 			arch[i].id[j] = id;
-			arch[i].type[j] = type;
+			arch[i].type[j] = type ^ 1;
 			arch[i].side[j] = side;
 			arch[i].ct[j] = ct;
 		}n4 += q;
@@ -125,8 +128,8 @@ void MapGraph::BuildGraph() {
 		for (int j = 0;j<n2; ++j) {
 			if (rds[0][i].x1<rds[1][j].x1) {
 				if (rds[0][i].x2 > rds[1][j].x1) {
-					if (rds[1][i].y1 < rds[0][j].y1) {
-						if (rds[1][i].y2 > rds[0][j].y1) {
+					if (rds[1][j].y1 < rds[0][i].y1) {
+						if (rds[1][j].y2 > rds[0][i].y1) {
 							n3++;
 						}
 					}
@@ -134,14 +137,14 @@ void MapGraph::BuildGraph() {
 			}
 		}
 	}
-	a = new Point[n4 + n3+30];
+	GetHead(n4 + n3 + 30);
 	PointSiz = 0;
 	for (int i = 0; i < n1; ++i) {//路口放入point
 		for (int j = 0; j < n2; ++j) {
 			if (rds[0][i].x1 < rds[1][j].x1) {
 				if (rds[0][i].x2 > rds[1][j].x1) {
-					if (rds[1][i].y1 < rds[0][j].y1) {
-						if (rds[1][i].y2 > rds[0][j].y1) {
+					if (rds[1][j].y1 < rds[0][i].y1) {
+						if (rds[1][j].y2 > rds[0][i].y1) {
 							GetPoint(i,j,0,rds[1][j].x1,rds[0][i].y1);
 						}
 					}
@@ -177,13 +180,12 @@ void MapGraph::BuildGraph() {
 std::pair<int,int> MapGraph::GetType(int x) {
 	int type=0,num=0;
 	type = a[x].type;
-
 	return std::make_pair(type,num);
 }
 void MapGraph::Dijkstra(int rt) {
 	for (int i = 1; i <= PointSiz; ++i)disf[i]=0;
 	while (!q.empty()) q.pop();
-	dis[rt] = 0; 
+	dis[rt] = 0; disf[rt] = 1;
 	q.push(std::make_pair(dis[rt], rt));
 	while (!q.empty()) {
 		double vv = q.top().first;
@@ -255,6 +257,14 @@ int* MapGraph::TSP(int rt,int n,int p[]) {
 }
 void MapGraph::OutWay(int rt,int x) {
 	Dijkstra(rt);
-	std::cout << 1 << std::endl;
+	std::cout << a[rt].rd[0] << ' ' << a[rt].rd[1] << std::endl;
+	std::cout << a[x].rd[0] << ' ' << a[x].rd[1] << std::endl;
+	if (disf[x])std::cout << dis[x] << std::endl;
+	else std::cout << -1 << std::endl;
+	for (int i = x; i != rt; i = las[i]) {
+		if (a[i].type == 0) {
+			std::cout << a[i].rd[0] << ' ' << a[i].rd[1]<<std::endl;
+		}
+	}
 	return;
 }

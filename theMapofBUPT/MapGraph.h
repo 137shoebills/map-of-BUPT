@@ -30,7 +30,7 @@ private:
 	void Init(int x,int y,double vv);//建立一条双向边
 	void GetHead(int n);//输入点数，初始化需要的动态内存
 	int GetPoint(int rd1,int rd2,int typ,double x,double y);//储存一个点
-	void TSPdfs(int k, int n, double v);
+	void TSPdfs(int k, int n, double v);//tsp深搜
 public:
 	void BuildGraph();//从文件中读入点的性质，位置，连线关系并建图
 	void Dijkstra(int rt);//最短路算法，计算rt到每个点的距离
