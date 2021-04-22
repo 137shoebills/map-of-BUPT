@@ -75,25 +75,27 @@ void MapGraph::BuildGraph() {
 		Init(x,y,vv);
 	}*/
 	int n1, n2, m,y1,y2,x1,x2;
-	std::cin >> n1;
-	rds[0] = new Road[n1+10];
-	rdn[0] = n1;
-	for (int i = 0;i<n1; ++i) {//读入横着的道路
-		std::cin >> y1 >> x1 >> x2;
-		rds[0][i].x1 = x1;
-		rds[0][i].x2 = x2;
-		rds[0][i].y1 = y1;
-		rds[0][i].y2 = y1;
-	}
 	std::cin >> n2;
-	rds[1] = new Road[n2+10];
+	rds[1] = new Road[n2 + 10];
 	rdn[1] = n2;
 	for (int i = 0; i < n2; ++i) {//读入竖着的道路
-		std::cin>> x1 >> y1 >> y2 ;
+		int t;//id
+		std::cin >> x1 >> y1 >> y2 >> t;
 		rds[1][i].y1 = y1;
 		rds[1][i].y2 = y2;
 		rds[1][i].x1 = x1;
 		rds[1][i].x2 = x1;
+	}
+	std::cin >> n1;
+	rds[0] = new Road[n1+10];
+	rdn[0] = n1;
+	for (int i = 0;i<n1; ++i) {//读入横着的道路
+		int t;//id
+		std::cin >> y1 >> x1 >> x2 >> t;
+		rds[0][i].x1 = x1;
+		rds[0][i].x2 = x2;
+		rds[0][i].y1 = y1;
+		rds[0][i].y2 = y1;
 	}
 	std::cin >> m;
 	arch = new Architecture[m+10];
@@ -101,7 +103,8 @@ void MapGraph::BuildGraph() {
 	char name[30]; int q;
 	int n4 = 0;//n4为建筑物上的点的个数
 	for (int i = 0; i < m; ++i){ //读入建筑上的门
-		std::cin >> name >> q ;
+		int t;
+		std::cin >>t >> name >> q ;
 		int id, side,type;
 		double ct;
 		arch[i].q = q;

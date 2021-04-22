@@ -37,8 +37,8 @@ public:
 	~MapGraph();//析构函数
 	double GetDis(int x);//输出到x点的最短路距离
 	int* TSP(int rt,int n,int p[]);
-	void OutWay(int rt,int x);
 	//途径多点最短路算法，返回一个大小为n的数组表示第i个访问的点。
+	void OutWay(int rt, int x);//输出两点之间最短路径
 	std::pair<int,int> GetType(int x);
 };
 
