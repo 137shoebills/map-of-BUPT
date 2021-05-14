@@ -90,6 +90,7 @@ void MapGraph::BuildGraph() {
 		rds[1][i].x2 = x1;
 	}
 	mapin >> n1;
+	//std::cout << n1 << n2 << std::endl;
 	rds[0] = new Road[n1+10];
 	rdn[0] = n1;
 	for (int i = 0;i<n1; ++i) {//读入横着的道路
@@ -105,9 +106,11 @@ void MapGraph::BuildGraph() {
 	archn = m;
 	char name[50]; int q;
 	int n4 = 0;//n4为建筑物上的点的个数
+	//std::cout<<m<<std::endl;
 	for (int i = 0; i < m; ++i){ //读入建筑上的门
 		int t;
 		mapin >> t >> name >> q;
+		//std::cout<<name<<std::endl;
 		int id, side,type;
 		double ct;
 		arch[i].q = q;
@@ -131,6 +134,10 @@ void MapGraph::BuildGraph() {
 					if (rds[1][j].y1 < rds[0][i].y1) {
 						if (rds[1][j].y2 > rds[0][i].y1) {
 							n3++;
+							std::cout << i+1 << ' ' << j+1 << std::endl;
+							std::cout << rds[0][i].x1 << ' ' << rds[0][i].x2 << ' ' << rds[0][i].y1 << ' ' << rds[0][i].y2 << std::endl;
+							std::cout << rds[1][j].x1 << ' ' << rds[1][j].x2 << ' ' << rds[1][j].y1 << ' ' << rds[1][j].y2 << std::endl;
+							
 						}
 					}
 				}
