@@ -134,10 +134,10 @@ void MapGraph::BuildGraph() {
 					if (rds[1][j].y1 < rds[0][i].y1) {
 						if (rds[1][j].y2 > rds[0][i].y1) {
 							n3++;
-							std::cout << i+1 << ' ' << j+1 << std::endl;
-							std::cout << rds[0][i].x1 << ' ' << rds[0][i].x2 << ' ' << rds[0][i].y1 << ' ' << rds[0][i].y2 << std::endl;
-							std::cout << rds[1][j].x1 << ' ' << rds[1][j].x2 << ' ' << rds[1][j].y1 << ' ' << rds[1][j].y2 << std::endl;
-							
+							//std::cout << i+1 << ' ' << j+1 << std::endl;
+							//std::cout << rds[0][i].x1 << ' ' << rds[0][i].x2 << ' ' << rds[0][i].y1 << ' ' << rds[0][i].y2 << std::endl;
+							//std::cout << rds[1][j].x1 << ' ' << rds[1][j].x2 << ' ' << rds[1][j].y1 << ' ' << rds[1][j].y2 << std::endl;
+
 						}
 					}
 				}
@@ -152,7 +152,8 @@ void MapGraph::BuildGraph() {
 				if (rds[0][i].x2 > rds[1][j].x1) {
 					if (rds[1][j].y1 < rds[0][i].y1) {
 						if (rds[1][j].y2 > rds[0][i].y1) {
-							GetPoint(i,j,0,rds[1][j].x1,rds[0][i].y1);
+							int zz=GetPoint(i,j,0,rds[1][j].x1,rds[0][i].y1);
+							std::cout << zz << ' ' << i+1 << ' ' << j+1 << std::endl;
 						}
 					}
 				}
@@ -183,6 +184,7 @@ void MapGraph::BuildGraph() {
 		}
 	}
 	std::sort(a, a + PointSiz, Cmp3);
+	mapin.close();
 }
 std::pair<int,int> MapGraph::GetType(int x) {
 	int type=0,num=0;
@@ -264,13 +266,14 @@ int* MapGraph::TSP(int rt,int n,int p[]) {
 }
 void MapGraph::OutWay(int rt,int x) {
 	Dijkstra(rt);
-	std::cout << a[rt].rd[0] << ' ' << a[rt].rd[1] << std::endl;
-	std::cout << a[x].rd[0] << ' ' << a[x].rd[1] << std::endl;
+	std::cout << a[rt].rd[0]+1 << ' ' << a[rt].rd[1]+1 << std::endl;
+	std::cout << a[x].rd[0]+1 << ' ' << a[x].rd[1]+1 << std::endl;
 	if (disf[x])std::cout << dis[x] << std::endl;
 	else std::cout << -1 << std::endl;
+	std::cout << std::endl;
 	for (int i = x; i != rt; i = las[i]) {
 		if (a[i].type == 0) {
-			std::cout << a[i].rd[0] << ' ' << a[i].rd[1]<<std::endl;
+			std::cout << a[i].rd[0]+1 << ' ' << a[i].rd[1]+1<<std::endl;
 		}
 	}
 	return;
