@@ -47,7 +47,6 @@ public:
 	//在b字符串中查找子序列a，查找到则返回1，否则返回0.
 	void Search();
 	//读入一个字符串，输出搜索到的地名
-
 };
 
 bool Cmp1(Point x,Point y);//先统计横边上的点排序
