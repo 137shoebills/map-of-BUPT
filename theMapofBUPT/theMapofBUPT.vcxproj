@@ -150,6 +150,7 @@
     <ClInclude Include="architecture.h" />
     <ClInclude Include="Edge.h" />
     <ClInclude Include="MapGraph.h" />
+    <ClInclude Include="MyAddition.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="Road.h" />
   </ItemGroup>

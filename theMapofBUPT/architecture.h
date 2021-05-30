@@ -1,8 +1,9 @@
 #pragma once
+#include<string>
 class Architecture
 {
 public:
-	int name[50];
+	std::string name;//建筑的名字
 	int q;//门的数量
 	int* id;//门所在边的序号
 	int* type;//门所在的路的类型0横着1竖着

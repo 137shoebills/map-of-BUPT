@@ -2,6 +2,7 @@
 #include <fstream>
 #include<iostream>
 #include <cmath>
+#include "MyAddition.h"
 bool Cmp1(Point x, Point y) {
 	if (x.rd[0] != y.rd[0]) return x.rd[0] < y.rd[0];
 	else return x.cdx < y.cdx;
@@ -16,7 +17,7 @@ bool Cmp3(Point x, Point y) {
 MapGraph::~MapGraph() {
 	delete []las;
 	delete []disf;
-	delete []a;
+	a.clear();
 	while (!q.empty())q.pop();
 	for (int i = 1; i <= PointSiz; ++i) {
 		for (Edge* j = head[i];j!=NULL;) {
@@ -43,7 +44,6 @@ double MapGraph::GetDistance(double x, double y, double xx, double yy){
 	return std::sqrt(x*x+y*y);
 }
 void MapGraph::GetHead(int n) {
-	a = new Point [n+10];
 	head = new Edge * [n+10];
 	for (int i = 1; i <= n; ++i)head[i] = NULL;
 	dis = new double[n+10];
@@ -51,12 +51,14 @@ void MapGraph::GetHead(int n) {
 	disf = new bool[n+10];
 }
 int MapGraph::GetPoint(int rd1, int rd2, int typ, double x, double y){
-	a[PointSiz].id = PointSiz;
-	a[PointSiz].rd[0] = rd1;
-	a[PointSiz].rd[1] = rd2;
-	a[PointSiz].type = typ;
-	a[PointSiz].cdx = x;
-	a[PointSiz].cdy = y;
+	Point bb;
+	bb.id = PointSiz;
+	bb.rd[0] = rd1;
+	bb.rd[1] = rd2;
+	bb.type = typ;
+	bb.cdx = x;
+	bb.cdy = y;
+	a.push_back(bb);
 	PointSiz++;
 	return PointSiz-1;
 }
@@ -102,22 +104,25 @@ void MapGraph::BuildGraph() {
 		rds[0][i].y2 = y1;
 	}
 	mapin >> m;
-	arch = new Architecture[m+10];
+	Architecture ar;
 	archn = m;
-	char name[50]; int q;
+	std::string na;
+	int q;
 	int n4 = 0;//n4为建筑物上的点的个数
 	//std::cout<<m<<std::endl;
 	for (int i = 0; i < m; ++i){ //读入建筑上的门
 		int t;
-		mapin >> t >> name >> q;
-		//std::cout<<name<<std::endl;
+		mapin >> t >> na >> q;
+		//std::cout<<na<<std::endl;
 		int id, side,type;
 		double ct;
-		arch[i].q = q;
-		arch[i].id = new int[q];
-		arch[i].side = new int[q];
-		arch[i].ct = new double[q];
-		arch[i].type = new int[q];
+		ar.name = na;
+		ar.q = q;
+		ar.id = new int[q];
+		ar.side = new int[q];
+		ar.ct = new double[q];
+		ar.type = new int[q];
+		arch.push_back(ar);
 		for (int j = 0; j < q; ++j) {
 			mapin >> type >> id >> side >> ct;
 			arch[i].id[j] = id;
@@ -153,7 +158,7 @@ void MapGraph::BuildGraph() {
 					if (rds[1][j].y1 < rds[0][i].y1) {
 						if (rds[1][j].y2 > rds[0][i].y1) {
 							int zz=GetPoint(i,j,0,rds[1][j].x1,rds[0][i].y1);
-							std::cout << zz << ' ' << i+1 << ' ' << j+1 << std::endl;
+							//std::cout << zz << ' ' << i+1 << ' ' << j+1 << std::endl;
 						}
 					}
 				}
@@ -163,11 +168,30 @@ void MapGraph::BuildGraph() {
 	for (int i = 0; i < m; ++i){//建筑物上的点放入point
 		for (int j = 0; j < arch[i].q; ++j) {
 			int id = arch[i].id[j];
-			if (arch[i].type[j] == 0)GetPoint(id, -1, 1,arch[i].ct[j], rds[0][id].y1);
-			else GetPoint(-1,id,1,rds[1][id].x1,arch[i].ct[j]);
+			int zz=0;
+			if (arch[i].type[j] == 0) {
+				zz = GetPoint(id, -1, 1, arch[i].ct[j], rds[0][id].y1);
+				if (arch[i].side[j] == 0) {
+					a[zz].name = arch[i].name + "南门";
+				}
+				else {
+
+					a[zz].name = arch[i].name + "北门";
+				}//std::cout << a[zz].name << std::endl;
+			}
+			else { 
+				zz = GetPoint(-1, id, 1, rds[1][id].x1, arch[i].ct[j]); 
+				if (arch[i].side[j] == 0) {
+					a[zz].name = arch[i].name + "东门";
+				}
+				else {
+
+					a[zz].name = arch[i].name + "西门";
+				}//std::cout << a[zz].name << std::endl;
+			}
 		}
 	}
-	std::sort(a, a + PointSiz, Cmp1);//统计横路上的点之间的关系
+	std::sort(a.begin(), a.end(), Cmp1);//统计横路上的点之间的关系
 	for (int i = 0; i < PointSiz-1; ++i) {
 		if (a[i].rd[0] == -1)continue;
 		if (a[i].rd[0]==a[i+1].rd[0]) {
@@ -175,7 +199,7 @@ void MapGraph::BuildGraph() {
 			Init(a[i].id, a[i + 1].id, z);
 		}
 	}
-	std::sort(a, a + PointSiz, Cmp2);//统计竖着的路上的点之间的关系
+	std::sort(a.begin(), a.end(), Cmp2);//统计竖着的路上的点之间的关系
 	for (int i = 0; i < PointSiz - 1; ++i) {
 		if (a[i].rd[1]==-1)continue;
 		if (a[i].rd[1] == a[i + 1].rd[1]) {
@@ -183,7 +207,7 @@ void MapGraph::BuildGraph() {
 			Init(a[i].id, a[i + 1].id, z);
 		}
 	}
-	std::sort(a, a + PointSiz, Cmp3);
+	std::sort(a.begin(), a.end(), Cmp3);
 	mapin.close();
 }
 std::pair<int,int> MapGraph::GetType(int x) {
@@ -257,6 +281,8 @@ int* MapGraph::TSP(int rt,int n,int p[]) {
 		TSPdfs(1, n, GetDis(p[i]));
 		TSPf[i] = 0;
 	}
+	for (int i = 0; i < n; ++i)TSPans[i] = p[TSPans[i]];
+	
 	for (int i = 0; i < n; ++i) {
 		delete TSPdis[i];
 	}delete TSPdis;
@@ -266,15 +292,58 @@ int* MapGraph::TSP(int rt,int n,int p[]) {
 }
 void MapGraph::OutWay(int rt,int x) {
 	Dijkstra(rt);
-	std::cout << a[rt].rd[0]+1 << ' ' << a[rt].rd[1]+1 << std::endl;
-	std::cout << a[x].rd[0]+1 << ' ' << a[x].rd[1]+1 << std::endl;
-	if (disf[x])std::cout << dis[x] << std::endl;
-	else std::cout << -1 << std::endl;
-	std::cout << std::endl;
+	//std::cout << a[rt].rd[0]+1 << ' ' << a[rt].rd[1]+1 << std::endl;
+	//std::cout << a[x].rd[0]+1 << ' ' << a[x].rd[1]+1 << std::endl;
+	if (disf[x])std::cout << "两地之间距离为:" << dis[x] << std::endl;
+	else std::cout << "两地点不连通" << std::endl;
 	for (int i = x; i != rt; i = las[i]) {
 		if (a[i].type == 0) {
-			std::cout << a[i].rd[0]+1 << ' ' << a[i].rd[1]+1<<std::endl;
+			std::cout<<"经过路口，两路口编号分别为：" << a[i].rd[0]+1 << ' ' << a[i].rd[1]+1<<std::endl;
+		}
+		else {
+			std::cout << "经过"<< a[i].name << std::endl;
 		}
 	}
+	std::cout << std::endl;
 	return;
+}
+bool MapGraph::MakeCP(std::string a, std::string b) {//在b字符串中查找子序列a
+	int** f;
+	f = new int* [100];
+	for (int i = 0; i < 100; ++i) {
+		f[i] = new int[100];
+		for (int j = 0; j < 100; ++j)f[i][j] = 0;
+	}
+	std::string aa = '0' + a;
+	std::string bb = '0' + b;
+	for (int i = 0; i <= b.size(); ++i) f[i][0] = 1;
+	for (int i = 1; i < bb.size(); ++i) {
+		for (int j = 1; j < aa.size(); ++j) {
+			if (bb[i] == aa[j] && f[i - 1][j - 1]) {
+				f[i][j] = 1;
+			}
+			if (f[i - 1][j])f[i][j] = 1;
+		}
+	}
+	int xx = f[b.size()][a.size()];
+	for (int i = 0; i < 100; ++i) {
+		delete[] f[i];
+	}
+	delete[] f;
+	return xx;
+}
+void MapGraph::Search() {
+	std::string name,cmd;
+	name = GetS();
+	int ff = 0;
+	std::cout << "搜索结果如下:" << std::endl;
+	for (int i = 0;i<PointSiz; ++i) {
+		if ( a[i].type == 0)continue;
+		int f = MakeCP(name,a[i].name);
+		if (f) {
+			++ff;
+			std::cout << a[i].name << std::endl;
+		}
+	}
+	std::cout << "共搜索到" << ff << "个结果" << std::endl;
 }
