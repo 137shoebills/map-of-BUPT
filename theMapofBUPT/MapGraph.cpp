@@ -15,8 +15,9 @@ bool Cmp3(Point x, Point y) {
 	return x.id < y.id;
 }
 MapGraph::~MapGraph() {
-	delete []las;
-	delete []disf;
+	delete[]las;
+	delete[]nex;
+	delete[]disf;
 	a.clear();
 	while (!q.empty())q.pop();
 	for (int i = 1; i <= PointSiz; ++i) {
@@ -46,9 +47,10 @@ double MapGraph::GetDistance(double x, double y, double xx, double yy){
 void MapGraph::GetHead(int n) {
 	head = new Edge * [n+10];
 	for (int i = 1; i <= n; ++i)head[i] = NULL;
-	dis = new double[n+10];
-	las = new int[n+10];
-	disf = new bool[n+10];
+	dis = new double[n + 10];
+	las = new int[n + 10];
+	nex = new int[n + 10];
+	disf = new bool[n + 10];
 }
 int MapGraph::GetPoint(int rd1, int rd2, int typ, double x, double y){
 	Point bb;
@@ -177,7 +179,7 @@ void MapGraph::BuildGraph() {
 				else {
 
 					a[zz].name = arch[i].name + "北门";
-				}//std::cout << a[zz].name << std::endl;
+				}std::cout << a[zz].name << zz << std::endl;
 			}
 			else { 
 				zz = GetPoint(-1, id, 1, rds[1][id].x1, arch[i].ct[j]); 
@@ -187,7 +189,7 @@ void MapGraph::BuildGraph() {
 				else {
 
 					a[zz].name = arch[i].name + "西门";
-				}//std::cout << a[zz].name << std::endl;
+				}std::cout << a[zz].name << zz << std::endl;
 			}
 		}
 	}
@@ -297,14 +299,59 @@ void MapGraph::OutWay(int rt,int x) {
 	if (disf[x])std::cout << "两地之间距离为:" << dis[x] << std::endl;
 	else std::cout << "两地点不连通" << std::endl;
 	for (int i = x; i != rt; i = las[i]) {
+		nex[las[i]] = i;
+	}
+	for (int i = rt; i != x; i = nex[i]) {
 		if (a[i].type == 0) {
-			std::cout<<"经过路口，两路口编号分别为：" << a[i].rd[0]+1 << ' ' << a[i].rd[1]+1<<std::endl;
+			std::cout << "经过路口，该路口是横向路 "<<a[i].rd[0]+1<<" 和纵向路 "<<a[i].rd[1]+1<<" 的交叉口"<< std::endl;
+			if (i == rt) {
+				if (a[nex[i]].rd[0] == a[i].rd[0]) {
+					if (a[i].cdx < a[nex[i]].cdx)
+						std::cout << "从该路口向东走" << std::endl;
+					else
+						std::cout << "从该路口向西走" << std::endl;
+				}
+				else {
+					if (a[i].cdy < a[nex[i]].cdy)
+						std::cout << "从该路口向南走" << std::endl;
+					else
+						std::cout << "从该路口向北走" << std::endl;
+				}
+			}
+			else {
+				if (a[nex[i]].rd[0] == a[i].rd[0]) {
+					if (a[las[i]].rd[0] == a[i].rd[0])
+						std::cout << "从该路口直走" << std::endl;
+					else{
+						int ff0 = 0, ff1 = 0;
+						if (a[i].cdx < a[nex[i]].cdx)ff0 = 1;
+						if (a[i].cdy > a[las[i]].cdy)ff1 = 1;
+						if (ff0 ^ ff1 == 0)
+							std::cout << "从该路口左拐" << std::endl;
+						else
+							std::cout << "从该路口右拐" << std::endl;
+					}
+				}
+				else{
+					if (a[las[i]].rd[1] == a[i].rd[1])
+						std::cout << "从该路口直走" << std::endl;
+					else {
+						int ff0 = 0, ff1 = 0;
+						if (a[i].cdy < a[nex[i]].cdy)ff0 = 1;
+						if (a[i].cdx > a[las[i]].cdx)ff1 = 1;
+						if (ff0 ^ ff1 == 0)
+							std::cout << "从该路口右拐" << std::endl;
+						else
+							std::cout << "从该路口左拐" << std::endl;
+					}
+				}
+			}
 		}
 		else {
 			std::cout << "经过"<< a[i].name << std::endl;
 		}
 	}
-	std::cout << std::endl;
+	std::cout << "路径输出完毕" << std::endl;
 	return;
 }
 bool MapGraph::MakeCP(std::string a, std::string b) {//在b字符串中查找子序列a

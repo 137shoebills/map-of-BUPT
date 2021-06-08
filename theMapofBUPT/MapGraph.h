@@ -22,6 +22,7 @@ private:
 	double* dis;//rt到每个点的距离
 	bool* disf;//rt到每个点是否已经有一条通路
 	int* las;//最短路中每个点的前一个点
+	int* nex;//最短路中每一个点的后一个点
 	double **TSPdis;//途径多点最短路所需的每两点之间距离
 	double TSPmin;//tsp搜索过程中的最小值。
 	int* TSPway;//tsp搜索过程中获得的路径

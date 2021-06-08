@@ -1,6 +1,8 @@
 ﻿  MapGraph.cpp
 D:\coding\TheMapofBUPT\theMapofBUPT\MyAddition.h(20,21): warning C4018: “<”: 有符号/无符号不匹配
-D:\coding\TheMapofBUPT\theMapofBUPT\MapGraph.cpp(319,20): warning C4018: “<=”: 有符号/无符号不匹配
-D:\coding\TheMapofBUPT\theMapofBUPT\MapGraph.cpp(320,20): warning C4018: “<”: 有符号/无符号不匹配
-D:\coding\TheMapofBUPT\theMapofBUPT\MapGraph.cpp(321,21): warning C4018: “<”: 有符号/无符号不匹配
+D:\coding\TheMapofBUPT\theMapofBUPT\MapGraph.cpp(329,25): warning C4554: “^”: 检查运算符优先级是否存在的可能的错误；使用括号阐明优先级
+D:\coding\TheMapofBUPT\theMapofBUPT\MapGraph.cpp(342,25): warning C4554: “^”: 检查运算符优先级是否存在的可能的错误；使用括号阐明优先级
+D:\coding\TheMapofBUPT\theMapofBUPT\MapGraph.cpp(366,20): warning C4018: “<=”: 有符号/无符号不匹配
+D:\coding\TheMapofBUPT\theMapofBUPT\MapGraph.cpp(367,20): warning C4018: “<”: 有符号/无符号不匹配
+D:\coding\TheMapofBUPT\theMapofBUPT\MapGraph.cpp(368,21): warning C4018: “<”: 有符号/无符号不匹配
   theMapofBUPT.vcxproj -> D:\coding\TheMapofBUPT\Debug\theMapofBUPT.exe
