@@ -18,6 +18,7 @@ MapGraph::~MapGraph() {
 	delete[]las;
 	delete[]nex;
 	delete[]disf;
+	delete[]su;
 	a.clear();
 	while (!q.empty())q.pop();
 	for (int i = 1; i <= PointSiz; ++i) {
@@ -64,7 +65,7 @@ int MapGraph::GetPoint(int rd1, int rd2, int typ, double x, double y){
 	PointSiz++;
 	return PointSiz-1;
 }
-void MapGraph::BuildGraph() {
+void MapGraph::BuildGraph(std::string mapname,std::string sugname) {
 	/*int n,x,y,m;
 	std::cin >> n>>m;
 	PointSiz = n;
@@ -79,8 +80,20 @@ void MapGraph::BuildGraph() {
 		Init(x,y,vv);
 	}*/
 	std::ifstream mapin;
-	mapin.open("Map_Data.txt");
+	std::ifstream sugin;
+	mapin.open(mapname.c_str());
+	sugin.open(sugname.c_str());
 	if (!mapin)return ;
+	if (!sugin)return;
+	sugn = 0;
+	sugin >> sugn;
+	su = new Suggest[sugn+10];
+	for (int i = 0; i < sugn; ++i) {
+		std::string sugs, sugp;
+		sugin >> sugs >> sugp;
+		su[i].source = sugs;
+		su[i].sug = sugp;
+	}
 	int n1, n2, m,y1,y2,x1,x2;
 	mapin >> n2;
 	rds[1] = new Road[n2 + 10];
@@ -127,7 +140,7 @@ void MapGraph::BuildGraph() {
 		arch.push_back(ar);
 		for (int j = 0; j < q; ++j) {
 			mapin >> type >> id >> side >> ct;
-			arch[i].id[j] = id;
+			arch[i].id[j] = id-1;
 			arch[i].type[j] = type ^ 1;
 			arch[i].side[j] = side;
 			arch[i].ct[j] = ct;
@@ -174,22 +187,20 @@ void MapGraph::BuildGraph() {
 			if (arch[i].type[j] == 0) {
 				zz = GetPoint(id, -1, 1, arch[i].ct[j], rds[0][id].y1);
 				if (arch[i].side[j] == 0) {
-					a[zz].name = arch[i].name + "南门";
+					if(!MakeCP("南门",a[zz].name))a[zz].name = arch[i].name + "南门";
 				}
 				else {
-
-					a[zz].name = arch[i].name + "北门";
-				}std::cout << a[zz].name << zz << std::endl;
+					if (!MakeCP("北门", a[zz].name))a[zz].name = arch[i].name + "北门";
+				}//std::cout << a[zz].name << zz << std::endl;
 			}
 			else { 
 				zz = GetPoint(-1, id, 1, rds[1][id].x1, arch[i].ct[j]); 
 				if (arch[i].side[j] == 0) {
-					a[zz].name = arch[i].name + "东门";
+					if (!MakeCP("东门", a[zz].name))a[zz].name = arch[i].name + "东门";
 				}
 				else {
-
-					a[zz].name = arch[i].name + "西门";
-				}std::cout << a[zz].name << zz << std::endl;
+					if (!MakeCP("西门", a[zz].name))a[zz].name = arch[i].name + "西门";
+				}//std::cout << a[zz].name << zz << std::endl;
 			}
 		}
 	}
@@ -211,6 +222,7 @@ void MapGraph::BuildGraph() {
 	}
 	std::sort(a.begin(), a.end(), Cmp3);
 	mapin.close();
+	std::cout<< "建图成功" << std::endl;
 }
 std::pair<int,int> MapGraph::GetType(int x) {
 	int type=0,num=0;
@@ -303,7 +315,7 @@ void MapGraph::OutWay(int rt,int x) {
 	}
 	for (int i = rt; i != x; i = nex[i]) {
 		if (a[i].type == 0) {
-			std::cout << "经过路口，该路口是横向路 "<<a[i].rd[0]+1<<" 和纵向路 "<<a[i].rd[1]+1<<" 的交叉口"<< std::endl;
+			std::cout << "经过路口，该路口是横向路 "<<a[i].rd[0]+1<<" 和纵向路 "<<a[i].rd[1]+1<<" 的交叉口,";
 			if (i == rt) {
 				if (a[nex[i]].rd[0] == a[i].rd[0]) {
 					if (a[i].cdx < a[nex[i]].cdx)
@@ -326,7 +338,7 @@ void MapGraph::OutWay(int rt,int x) {
 						int ff0 = 0, ff1 = 0;
 						if (a[i].cdx < a[nex[i]].cdx)ff0 = 1;
 						if (a[i].cdy > a[las[i]].cdy)ff1 = 1;
-						if (ff0 ^ ff1 == 0)
+						if ((ff0 ^ ff1) == 0)
 							std::cout << "从该路口左拐" << std::endl;
 						else
 							std::cout << "从该路口右拐" << std::endl;
@@ -339,17 +351,41 @@ void MapGraph::OutWay(int rt,int x) {
 						int ff0 = 0, ff1 = 0;
 						if (a[i].cdy < a[nex[i]].cdy)ff0 = 1;
 						if (a[i].cdx > a[las[i]].cdx)ff1 = 1;
-						if (ff0 ^ ff1 == 0)
+						if ((ff0 ^ ff1) == 0)
 							std::cout << "从该路口右拐" << std::endl;
 						else
 							std::cout << "从该路口左拐" << std::endl;
 					}
 				}
 			}
+			//std::cout << a[i].cdx << a[i].cdy << std::endl;
 		}
 		else {
-			std::cout << "经过"<< a[i].name << std::endl;
+			if (i == rt) {
+				if (a[nex[i]].rd[0] == a[i].rd[0] && a[i].rd[0] != -1) {
+					if (a[i].cdx < a[nex[i]].cdx)
+						std::cout << "从" << a[i].name << "向东走" << std::endl;
+					else
+						std::cout << "从" << a[i].name << "向西走" << std::endl;
+				}
+				else {
+					if (a[i].cdy < a[nex[i]].cdy)
+						std::cout << "从" << a[i].name << "向南走" << std::endl;
+					else
+						std::cout << "从" << a[i].name << "向北走" << std::endl;
+				}
+			}
+			else {
+				std::cout << "经过" << a[i].name << std::endl;
+				//std::cout << a[i].cdx<<a[i].cdy << std::endl;
+			}
 		}
+	}
+	if (a[x].type == 0) {
+		std::cout << "到达横向路 " << a[x].rd[0] + 1 << " 和纵向路 " << a[x].rd[1] + 1 << " 的交叉口" << std::endl;
+	}
+	else{
+		std::cout << "到达" << a[x].name << std::endl;
 	}
 	std::cout << "路径输出完毕" << std::endl;
 	return;
@@ -425,20 +461,33 @@ void MapGraph::ClearOutWay() {
 	}
 	OutWay(rt, x);
 }
-void MapGraph::FuzzyOutWay() {
-	std::string rts, xs;
-	int rt = -1, x = -1, rtn=0, xn=0;
+int MapGraph::FuzzyStart() {
+	std::string rts;
+	int rt = -1, rtn = 0, ans = -1;
 	int* rtp = new int[PointSiz];
-	int* xp=new int[PointSiz];
 	std::cout << "请输入起点（输入“q”退出该模式）" << std::endl;
 	while (1) {
 		rts = GetS(); rtn = 0;
 		if (rts == "q") {
 			std::cout << "退出模糊查询路径模式" << std::endl;
-			return;
+			delete[]rtp;
+			return ans;
 		}
-		for (int i = 0; i < PointSiz; ++i) {
+		for (int i = 0; i < PointSiz; ++i) {//搜索含字符串的点的名字
 			if ( MakeCP(rts, a[i].name) )rtp[rtn++] = i;
+		}
+		for (int i = 0; i < sugn; ++i) {//搜索含联想字符串的点的名字
+			if (MakeCP(su[i].source, rts)) {
+				for (int j = 0; j < PointSiz; ++j) {
+					if (MakeCP(su[i].sug, a[j].name)) {
+						bool fff = 0;
+						for (int w = 0; w < rtn; ++w) {
+							if (rtp[w] == j)fff = 1;
+						}
+						if(!fff)rtp[rtn++] = j;
+					}
+				}
+			}
 		}
 		if (!rtn)std::cout << "起点未搜索到，请重新输入起点名称（输入“q”退出该模式）" << std::endl;
 		else {
@@ -454,20 +503,42 @@ void MapGraph::FuzzyOutWay() {
 
 			}
 			else {
-				std::swap(rtp[0],rtp[z]);
+				ans = rtp[z];
 				break;
 			}
 		}
 	}
+	delete[]rtp;
+	return ans;
+}
+
+int MapGraph::FuzzyEnd() {
+	std::string xs;
+	int x = -1, xn = 0, ans = -1;
+	int* xp = new int[PointSiz];
 	std::cout << "请输入终点（输入“q”退出该模式）" << std::endl;
 	while (1) {
 		xs = GetS(); xn = 0;
 		if (xs == "q") {
 			std::cout << "退出模糊查询路径模式" << std::endl;
-			return;
+			delete[]xp;
+			return ans;
 		}
-		for (int i = 0; i < PointSiz; ++i) {
+		for (int i = 0; i < PointSiz; ++i) {//搜索含字符串的点的名字
 			if (MakeCP(xs, a[i].name))xp[xn++] = i;
+		}
+		for (int i = 0; i < sugn; ++i) {//搜索含联想字符串的点的名字
+			if (MakeCP(su[i].source, xs)) {
+				for (int j = 0; j < PointSiz; ++j) {
+					if (MakeCP(su[i].sug, a[j].name)) {
+						bool fff = 0;
+						for (int w = 0; w < xn; ++w) {
+							if (xp[w] == j)fff = 1;
+						}
+						if (!fff)xp[xn++] = j;
+					}
+				}
+			}
 		}
 		if (!xn)std::cout << "终点未搜索到，请重新输入终点名称（输入“q”退出该模式）" << std::endl;
 		else {
@@ -475,7 +546,7 @@ void MapGraph::FuzzyOutWay() {
 			for (int i = 0; i < xn; ++i) {
 				std::cout << i << ". " << a[xp[i]].name << std::endl;
 			}
-			std::cout << "请输入所选择的具体地点的序号（-1重新搜索起点）" << std::endl;
+			std::cout << "请输入所选择的具体地点的序号（-1重新搜索终点）" << std::endl;
 			int z = GetInt();
 			if (z == -1)continue;
 			else if (z >= xn || z < -1) {
@@ -483,10 +554,14 @@ void MapGraph::FuzzyOutWay() {
 
 			}
 			else {
-				std::swap(xp[0], xp[z]);
+				ans = xp[z];
 				break;
 			}
 		}
 	}
-	OutWay(rtp[0], xp[0]);
+	delete[]xp;
+	return ans;
+}
+std::string MapGraph::GetName(int i){
+	return a[i].name;
 }

@@ -142,6 +142,7 @@
     <ClCompile Include="architecture.cpp" />
     <ClCompile Include="Edge.cpp" />
     <ClCompile Include="MapGraph.cpp" />
+    <ClCompile Include="MyAddition.cpp" />
     <ClCompile Include="Point.cpp" />
     <ClCompile Include="Road.cpp" />
     <ClCompile Include="theMapofBUPT.cpp" />
@@ -153,6 +154,11 @@
     <ClInclude Include="MyAddition.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="Road.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Benbu_Map_Data.txt" />
+    <Text Include="Shahe_Map_Data.txt" />
+    <Text Include="suggest_data.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

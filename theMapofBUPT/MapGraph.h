@@ -28,6 +28,8 @@ private:
 	int* TSPway;//tsp搜索过程中获得的路径
 	int* TSPans;//tsp答案
 	bool* TSPf;//tsp搜索过程中是否遍历某点
+	struct Suggest* su;//联想词组
+	int sugn;//联想词组数目
 	std::priority_queue< pa, std::vector< pa >, std::greater< pa > >q;
 	double GetDistance(double x,double y,double xx,double yy);//求两点直线距离
 	void Init(int x,int y,double vv);//建立一条双向边
@@ -35,7 +37,7 @@ private:
 	int GetPoint(int rd1,int rd2,int typ,double x,double y);//储存一个点
 	void TSPdfs(int k, int n, double v);//tsp深搜
 public:
-	void BuildGraph();//从文件中读入点的性质，位置，连线关系并建图
+	void BuildGraph(std::string mapname,std::string sugname);//从文件中读入点的性质，位置，连线关系并建图
 	void Dijkstra(int rt);//最短路算法，计算rt到每个点的距离
 	~MapGraph();//析构函数
 	double GetDis(int x);//输出到x点的最短路距离，调用前需要先调用Dijkstra
@@ -48,10 +50,13 @@ public:
 	//在b字符串中查找子序列a，查找到则返回1，否则返回0.
 	void ClearOutWay();
 	//清晰查询路径
-	void FuzzyOutWay();
-	//模糊查询路径
+	int FuzzyStart();
+	int FuzzyEnd();
+	//模糊查询起点和终点
 	void Search();
 	//读入一个字符串，输出搜索到的地名
+	std::string GetName(int i);
+	//返回一个点的名称
 };
 
 bool Cmp1(Point x,Point y);//先统计横边上的点排序
