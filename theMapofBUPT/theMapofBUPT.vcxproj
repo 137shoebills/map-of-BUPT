@@ -143,6 +143,7 @@
     <ClCompile Include="Edge.cpp" />
     <ClCompile Include="MapGraph.cpp" />
     <ClCompile Include="MyAddition.cpp" />
+    <ClCompile Include="Person.cpp" />
     <ClCompile Include="Point.cpp" />
     <ClCompile Include="Road.cpp" />
     <ClCompile Include="theMapofBUPT.cpp" />
@@ -152,6 +153,7 @@
     <ClInclude Include="Edge.h" />
     <ClInclude Include="MapGraph.h" />
     <ClInclude Include="MyAddition.h" />
+    <ClInclude Include="Person.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="Road.h" />
   </ItemGroup>

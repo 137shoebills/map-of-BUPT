@@ -2,6 +2,7 @@
 #include "Edge.h"
 #include "Point.h"
 #include "Road.h"
+#include "Person.h"
 #include "Architecture.h"
 #include<queue>
 #include<string>
@@ -30,6 +31,7 @@ private:
 	bool* TSPf;//tsp搜索过程中是否遍历某点
 	struct Suggest* su;//联想词组
 	int sugn;//联想词组数目
+	Person john;
 	std::priority_queue< pa, std::vector< pa >, std::greater< pa > >q;
 	double GetDistance(double x,double y,double xx,double yy);//求两点直线距离
 	void Init(int x,int y,double vv);//建立一条双向边
@@ -57,6 +59,10 @@ public:
 	//读入一个字符串，输出搜索到的地名
 	std::string GetName(int i);
 	//返回一个点的名称
+	void OutNeighbor(int x,int length);
+	//输出一个地点的临近地点
+	void SimJohn(int rt,int ed);//模拟行进过程
+	void John_Travel();
 };
 
 bool Cmp1(Point x,Point y);//先统计横边上的点排序

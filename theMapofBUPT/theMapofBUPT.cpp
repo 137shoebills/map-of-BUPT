@@ -206,7 +206,7 @@ int main()
     ben.BuildGraph(Benbu_Map,Suggest_Data);
     std::cout << "建立沙河地图\n";
     sha.BuildGraph(Shahe_Map,Suggest_Data);
-    for (;;)FuzzyTSP();
+    for (;;)ben.John_Travel();
     //int x, y;
     //std::cin>>x>>y;
     //b.OutWay(y,x);

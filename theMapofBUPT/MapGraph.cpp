@@ -1,7 +1,10 @@
 #include "MapGraph.h"
 #include <fstream>
-#include<iostream>
+#include <iostream>
 #include <cmath>
+#include <time.h>
+#include <windows.h>
+#include <conio.h>
 #include "MyAddition.h"
 bool Cmp1(Point x, Point y) {
 	if (x.rd[0] != y.rd[0]) return x.rd[0] < y.rd[0];
@@ -564,4 +567,207 @@ int MapGraph::FuzzyEnd() {
 }
 std::string MapGraph::GetName(int i){
 	return a[i].name;
+}
+void MapGraph::OutNeighbor(int x, int length) {
+	Dijkstra(x);
+	for (int i = 0; i < PointSiz; ++i) {
+		if (a[i].type == 0)continue;
+		else {
+			if(dis[i]<length) {
+				std::cout<<a[i].name<<std::endl;
+			}
+		}
+	}
+}
+void MapGraph::SimJohn(int rt, int ed) {
+	std::cout << "模拟开始" << std::endl;
+	john.timer.Start(john.scale);
+	double loc = 0;
+	char ch = ' ';
+	john.x = a[rt].cdx; john.y = a[rt].cdy;
+	for (int i = rt; i != ed; i = nex[i]) {
+		double disnow = loc + john.velo * (double)john.timer.Show() / 1000.0;
+		//std::cout << john.timer.Show() << std::endl;
+		john.p[0] = i, john.p[1] = nex[i];
+		while (disnow <= (double)dis[nex[i]]) {
+
+			john.x = a[i].cdx;
+			john.y = a[i].cdy;
+			if (a[i].rd[0] != -1 && a[i].rd[0] == a[nex[i]].rd[0]) {
+				if (a[i].cdx < a[nex[i]].cdx)john.x += disnow - dis[i];
+				else john.x -= disnow - dis[i];
+			}
+			else {
+				if (a[i].cdy < a[nex[i]].cdy)john.y += disnow - dis[i];
+				else john.y -= disnow - dis[i];
+			}
+			if (_kbhit()) {
+				ch = _getch();
+				if (ch == 's') {
+					john.timer.Stop();
+					loc = disnow;
+					//std::cout << disnow <<' '<< dis[ed] << std::endl;
+					std::cout << "暂停模拟，继续模拟输入'k'，退出当前路径模拟输入'q'，更改时间比例尺并继续模拟输入'c'" << std::endl;
+					std::string ss = GetS();
+					while (ss != "q" && ss != "k" && ss != "c") {
+						std::cout << "请重新输入命令符，继续模拟输入'k'，退出当前路径模拟输入'q'，更改时间比例尺并继续模拟输入'c'" << std::endl;
+						ss = GetS();
+					}
+					if (ss == "q") {
+						john.p[0] = john.p[1] = i;
+						john.x = a[i].cdx;
+						john.y = a[i].cdy;
+						return;
+					}
+					else if (ss == "c") {
+						std::cout << "请输入时间比例尺" << std::endl;
+						john.scale = GetDouble();
+						if (john.scale<0) {
+							std::cout << "请重新输入时间比例尺（比例尺需要大于0）" << std::endl;
+							john.scale = GetDouble();
+						}
+						john.timer.Start(john.scale);
+					}
+					else if(ss=="k") john.timer.Start(john.scale);
+				}
+			}
+			Sleep(5);
+			disnow = loc + john.velo * (double)john.timer.Show() / 1000.0;
+		}
+		john.x = a[nex[i]].cdx; john.y = a[nex[i]].cdy;
+		if (a[i].type == 0) {
+			std::cout << "经过路口，该路口是横向路 " << a[i].rd[0] + 1 << " 和纵向路 " << a[i].rd[1] + 1 << " 的交叉口,";
+			if (i == rt) {
+				if (a[nex[i]].rd[0] == a[i].rd[0]) {
+					if (a[i].cdx < a[nex[i]].cdx)
+						std::cout << "从该路口向东走" << std::endl;
+					else
+						std::cout << "从该路口向西走" << std::endl;
+				}
+				else {
+					if (a[i].cdy < a[nex[i]].cdy)
+						std::cout << "从该路口向南走" << std::endl;
+					else
+						std::cout << "从该路口向北走" << std::endl;
+				}
+			}
+			else {
+				if (a[nex[i]].rd[0] == a[i].rd[0]) {
+					if (a[las[i]].rd[0] == a[i].rd[0])
+						std::cout << "从该路口直走" << std::endl;
+					else {
+						int ff0 = 0, ff1 = 0;
+						if (a[i].cdx < a[nex[i]].cdx)ff0 = 1;
+						if (a[i].cdy > a[las[i]].cdy)ff1 = 1;
+						if ((ff0 ^ ff1) == 0)
+							std::cout << "从该路口左拐" << std::endl;
+						else
+							std::cout << "从该路口右拐" << std::endl;
+					}
+				}
+				else {
+					if (a[las[i]].rd[1] == a[i].rd[1])
+						std::cout << "从该路口直走" << std::endl;
+					else {
+						int ff0 = 0, ff1 = 0;
+						if (a[i].cdy < a[nex[i]].cdy)ff0 = 1;
+						if (a[i].cdx > a[las[i]].cdx)ff1 = 1;
+						if ((ff0 ^ ff1) == 0)
+							std::cout << "从该路口右拐" << std::endl;
+						else
+							std::cout << "从该路口左拐" << std::endl;
+					}
+				}
+			}
+			//std::cout << a[i].cdx << a[i].cdy << std::endl;
+		}
+		else {
+			if (i == rt) {
+				if (a[nex[i]].rd[0] == a[i].rd[0] && a[i].rd[0] != -1) {
+					if (a[i].cdx < a[nex[i]].cdx)
+						std::cout << "从" << a[i].name << "向东走" << std::endl;
+					else
+						std::cout << "从" << a[i].name << "向西走" << std::endl;
+				}
+				else {
+					if (a[i].cdy < a[nex[i]].cdy)
+						std::cout << "从" << a[i].name << "向南走" << std::endl;
+					else
+						std::cout << "从" << a[i].name << "向北走" << std::endl;
+				}
+			}
+			else {
+				std::cout << "经过" << a[i].name << std::endl;
+				//std::cout << a[i].cdx<<a[i].cdy << std::endl;
+			}
+		}
+	}
+	if (a[ed].type == 0) {
+		std::cout << "到达横向路 " << a[ed].rd[0] + 1 << " 和纵向路 " << a[ed].rd[1] + 1 << " 的交叉口" << std::endl;
+	}
+	else {
+		std::cout << "到达" << a[ed].name << std::endl;
+	}
+	std::cout << "路径模拟停止" << std::endl;
+	std::cout << std::endl;
+	john.p[0] = john.p[1] = ed;
+	john.x = a[ed].cdx;
+	john.y = a[ed].cdy;
+}
+void MapGraph::John_Travel() {
+	std::cout<<"请输入一个数字表示模拟速度(单位：m/s)"<<std::endl;
+	john.velo = GetDouble();
+	while(john.velo <= 0) {
+		std::cout << "请输入一个数字表示模拟速度(单位：m/s),速度需大于0" << std::endl;
+		john.velo = GetDouble();
+	}
+	std::cout << std::endl;
+
+	std::cout << "请输入一个数字表示时间缩放比例尺（大于0的整数或小数）" << std::endl;
+	john.scale = GetDouble();
+	while (john.scale <= 0) {
+		std::cout << "请输入一个数字表示时间缩放比例尺（大于0的整数或小数）" << std::endl;
+		john.scale = GetDouble();
+	}
+	std::cout << std::endl;
+
+	int rt = FuzzyStart();
+	if (rt == -1) {
+		std::cout << "已退出路径模拟" << std::endl;
+		std::cout << std::endl;
+		return;
+	}
+	int ed = FuzzyEnd();
+	if (ed == -1) {
+		std::cout << "已退出路径模拟" << std::endl;
+		std::cout << std::endl;
+		return;
+	}
+	Dijkstra(rt);
+	for (int i = ed; i != rt; i = las[i]) {
+		nex[las[i]] = i;
+	}
+	while (1) {
+		SimJohn(rt, ed);
+		std::cout << "是否重新选取目的地，y(是)/n（否）" << std::endl;
+		std::string ss = GetS();
+		while (ss != "y" && ss != "n") {
+			std::cout << "请输入 'y' 或 'n'，y(是)/n（否）" << std::endl;
+			ss = GetS();
+		}
+		if (ss == "y") {
+			std::cout << std::endl;
+			ed = FuzzyEnd();
+			Dijkstra(john.p[0]);
+			for (int i = ed; i != john.p[0]; i = las[i]) {
+				nex[las[i]] = i;
+			}
+			SimJohn(john.p[0],ed);
+		}
+		else if (ss == "n") {
+			std::cout << "模拟结束" << std::endl;
+			std::cout << std::endl;
+			return;
+		}
+	}
 }
