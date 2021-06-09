@@ -394,3 +394,99 @@ void MapGraph::Search() {
 	}
 	std::cout << "共搜索到" << ff << "个结果" << std::endl;
 }
+void MapGraph::ClearOutWay() {
+	std::string rts, xs;
+	int rt = -1, x = -1;
+	std::cout << "请输入起点（输入“q”退出该模式）" << std::endl;
+	while (1) {
+		rts = GetS();
+		if (rts == "q") {
+			std::cout << "退出清晰查询路径模式" << std::endl;
+			return;
+		}
+		for (int i = 0; i < PointSiz; ++i) {
+			if (a[i].name == rts)rt = a[i].id;
+		}
+		if (rt == -1)std::cout << "起点未搜索到，请重新输入起点名称（输入“q”退出该模式）" << std::endl;
+		else break;
+	}
+	std::cout << "请输入终点（输入“q”退出该模式）" << std::endl;
+	while (1) {
+		xs = GetS();
+		if (xs == "q") {
+			std::cout << "退出清晰查询路径模式" << std::endl;
+			return;
+		}
+		for (int i = 0; i < PointSiz; ++i) {
+			if (a[i].name == xs)x = a[i].id;
+		}
+		if (rt == -1)std::cout << "终点未搜索到，请重新输入终点名称（输入“q”退出该模式）" << std::endl;
+		else break;
+	}
+	OutWay(rt, x);
+}
+void MapGraph::FuzzyOutWay() {
+	std::string rts, xs;
+	int rt = -1, x = -1, rtn=0, xn=0;
+	int* rtp = new int[PointSiz];
+	int* xp=new int[PointSiz];
+	std::cout << "请输入起点（输入“q”退出该模式）" << std::endl;
+	while (1) {
+		rts = GetS(); rtn = 0;
+		if (rts == "q") {
+			std::cout << "退出模糊查询路径模式" << std::endl;
+			return;
+		}
+		for (int i = 0; i < PointSiz; ++i) {
+			if ( MakeCP(rts, a[i].name) )rtp[rtn++] = i;
+		}
+		if (!rtn)std::cout << "起点未搜索到，请重新输入起点名称（输入“q”退出该模式）" << std::endl;
+		else {
+			std::cout << "搜索到地点如下：" << std::endl;
+			for (int i = 0; i < rtn; ++i) {
+				std::cout << i << ". " << a[rtp[i]].name << std::endl;
+			}
+			std::cout << "请输入所选择的具体地点的序号（-1重新搜索起点）" << std::endl;
+			int z = GetInt();
+			if (z == -1)continue;
+			else if (z >= rtn || z < -1) {
+				std::cout << "输入序号不合法,默认起点为 0. " << a[rtp[0]].name << std::endl;
+
+			}
+			else {
+				std::swap(rtp[0],rtp[z]);
+				break;
+			}
+		}
+	}
+	std::cout << "请输入终点（输入“q”退出该模式）" << std::endl;
+	while (1) {
+		xs = GetS(); xn = 0;
+		if (xs == "q") {
+			std::cout << "退出模糊查询路径模式" << std::endl;
+			return;
+		}
+		for (int i = 0; i < PointSiz; ++i) {
+			if (MakeCP(xs, a[i].name))xp[xn++] = i;
+		}
+		if (!xn)std::cout << "终点未搜索到，请重新输入终点名称（输入“q”退出该模式）" << std::endl;
+		else {
+			std::cout << "搜索到地点如下：" << std::endl;
+			for (int i = 0; i < xn; ++i) {
+				std::cout << i << ". " << a[xp[i]].name << std::endl;
+			}
+			std::cout << "请输入所选择的具体地点的序号（-1重新搜索起点）" << std::endl;
+			int z = GetInt();
+			if (z == -1)continue;
+			else if (z >= xn || z < -1) {
+				std::cout << "输入序号不合法,默认起点为 0. " << a[xp[0]].name << std::endl;
+
+			}
+			else {
+				std::swap(xp[0], xp[z]);
+				break;
+			}
+		}
+	}
+	OutWay(rtp[0], xp[0]);
+}

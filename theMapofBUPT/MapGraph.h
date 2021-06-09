@@ -46,6 +46,10 @@ public:
 	std::pair<int,int> GetType(int x);
 	bool MakeCP(std::string a,std::string b);
 	//在b字符串中查找子序列a，查找到则返回1，否则返回0.
+	void ClearOutWay();
+	//清晰查询路径
+	void FuzzyOutWay();
+	//模糊查询路径
 	void Search();
 	//读入一个字符串，输出搜索到的地名
 };

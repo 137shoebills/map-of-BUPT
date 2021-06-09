@@ -9,9 +9,10 @@ int main()
     MapGraph b;
     b.BuildGraph();
     std::cout << 1 << std::endl;
-    int x, y;
-    std::cin>>x>>y;
-    b.OutWay(y,x);
+    //int x, y;
+    //std::cin>>x>>y;
+    //b.OutWay(y,x);
+    //b.Search();
     return 0;
 }
 
