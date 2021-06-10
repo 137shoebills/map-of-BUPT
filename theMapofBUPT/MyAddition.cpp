@@ -3,6 +3,12 @@
 #include<iostream>
 #include<time.h>
 #include "MyAddition.h"
+
+int System_State = 0;//系统查询模式
+double System_Velo = 1.5;//当前模式的运动速度
+double System_Bike = 5.0;//默认的自行车速度
+double System_Person = 1.5;//默认的行走速度
+
 std::string GetS() {//按照格式读入字符串
 	std::string a;
 	getline(std::cin, a);

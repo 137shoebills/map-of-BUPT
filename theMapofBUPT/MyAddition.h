@@ -1,6 +1,10 @@
 #pragma once
 #include<string>
 #include<time.h>
+extern int System_State;//系统查询模式
+extern double System_Velo;//当前模式的运动速度
+extern double System_Bike;//默认的自行车速度
+extern double System_Person;//默认的行走速度
 std::string GetS();//按照格式读入字符串
 int GetInt();//按照格式读入int
 double GetDouble();//按照格式读入double

@@ -7,8 +7,8 @@ std::string Shahe_Map = "Shahe_Map_Data.txt";
 std::string Benbu_Map = "Benbu_Map_Data.txt";
 std::string Suggest_Data = "suggest_data.txt";
 MapGraph ben, sha;
-int bus_sta[2] = { 0,0 }; //本部和沙河公交车站地点，0为本部，1为沙河
-int schbus_sta[2] = { 0,0 };//本部和沙河校车站地点，0为本部，1为沙河
+const int bus_sta[2] = { 231,71 }; //本部和沙河公交车站地点，0为本部，1为沙河
+const int schbus_sta[2] = { 232,72 };//本部和沙河校车站地点，0为本部，1为沙河
 void FuzzyOutWay() {
     std::cout << "请输入模糊查询的类型：" << std::endl;
     std::cout << "0.本部内路径查询。" << std::endl;
@@ -51,14 +51,14 @@ void FuzzyOutWay() {
             tra = GetInt();
         }
         if (tra == 1) {
-            std::cout << "从起点到本部校门的路径如下" << std::endl;
+            std::cout << "从起点到本部公交车站的路径如下" << std::endl;
             ben.OutWay(rt, bus_sta[0]);
-            std::cout << "从沙河校门到目的地的路径如下" << std::endl;
+            std::cout << "从沙河公交车站到目的地的路径如下" << std::endl;
             sha.OutWay(bus_sta[1], ed);
         }else{
-            std::cout << "从起点到本部校车站点的路径如下" << std::endl;
+            std::cout << "从起点到本部校车站的路径如下" << std::endl;
             ben.OutWay(rt, schbus_sta[0]);
-            std::cout << "从沙河校车站点到目的地的路径如下" << std::endl;
+            std::cout << "从沙河校车站到目的地的路径如下" << std::endl;
             sha.OutWay(schbus_sta[1], ed);
         }
     }
@@ -75,15 +75,15 @@ void FuzzyOutWay() {
             tra = GetInt();
         }
         if (tra == 1) {
-            std::cout << "从起点到沙河校门的路径如下" << std::endl;
+            std::cout << "从起点到沙河公交车站的路径如下" << std::endl;
             ben.OutWay(rt, bus_sta[1]);
-            std::cout << "从本部校门到目的地的路径如下" << std::endl;
+            std::cout << "从本部公交车站到目的地的路径如下" << std::endl;
             sha.OutWay(bus_sta[0], ed);
         }
         else {
-            std::cout << "从起点到沙河校车站点的路径如下" << std::endl;
+            std::cout << "从起点到沙河校车站的路径如下" << std::endl;
             ben.OutWay(rt, schbus_sta[1]);
-            std::cout << "从本部校车站点到目的地的路径如下" << std::endl;
+            std::cout << "从本部校车站到目的地的路径如下" << std::endl;
             sha.OutWay(schbus_sta[0], ed);
         }
     }
@@ -116,6 +116,7 @@ void FuzzyTSP() {
         std::cout << std::endl;
         xp = new int[xn];
         for (int i = 0; i < xn; ++i) {
+            std::cout << "输入第 " <<i+1<<" 个目标地点:"<< std::endl;
             xp[i] = ben.FuzzyEnd();
             std::cout << std::endl;
             if (xp[i] == -1) {
@@ -124,6 +125,11 @@ void FuzzyTSP() {
             }
         }
         xp = ben.TSP(rt, xn, xp);
+        if (xp[0] == -1) {
+            std::cout << "这些地点不连通，TSP失败" << std::endl;
+            delete[]xp;
+            return;
+        }
         for (int i = 0; i < xn; ++i) {
             std::cout << "第" << i + 1 << "个应该前往的地点是" << ben.GetName(xp[i]) << std::endl;
         }
@@ -200,13 +206,93 @@ void FuzzyTSP() {
     delete[]xp;
     return;
 }
+void System_Setting() {
+    int state=0;
+    std::cout << "请输入数字表示需要更改的模式（输入-1退出模式选择），0. 理想化步行模式 1. 考虑拥挤度的步行模式 2. 自行车模式" << std::endl;
+    state = GetInt();
+    while (state < 0 || state>2) {
+        if (state == -1)return;
+        std::cout << "输入不合法，请重新输入数字表示需要更改的模式（输入-1退出模式选择），0. 理想化步行模式 1. 考虑拥挤度的步行模式 2. 自行车模式" << std::endl;
+        state = GetInt();
+    }
+    if (state == 0) {//理想化路径模式
+        System_State = state;
+        System_Velo = System_Person; //std::cout << 11 << std::endl;
+        sha.Change_Edge(0);
+        ben.Change_Edge(0);
+        std::cout << "已更改查询模式为理想化步行模式" << std::endl;
+    }
+    else if (state == 1) {//考虑拥挤度的步行模式
+        System_State = state;
+        System_Velo = System_Person;
+        sha.Change_Edge(1);
+        ben.Change_Edge(1);
+        std::cout << "已更改查询模式为考虑拥挤度的步行模式" << std::endl;
+    }
+    else if (state == 2) {//自行车模式
+        System_State = state;
+        System_Velo = System_Bike;
+        sha.Change_Edge(2);
+        ben.Change_Edge(2);
+        std::cout << "已更改查询模式为自行车模式" << std::endl;
+    }
+}
+void SimulatePath() {
+    std::cout << "请输入路径模拟的类型：" << std::endl;
+    std::cout << "0.本部内路径模拟。" << std::endl;
+    std::cout << "1.沙河内路径模拟。" << std::endl;
+    std::cout << "-1. 退出模拟" << std::endl;
+    int cmd = GetInt();
+    while (cmd < 0 || cmd>1) {
+        if (cmd == -1)return;
+        std::cout << "输入模拟类型不合法，请重新输入（输入-1退出模拟）" << std::endl;
+        cmd = GetInt();
+    }
+    std::cout << std::endl;
+    if (cmd == 0) {
+        ben.John_Travel();
+    }
+    else {
+        sha.John_Travel();
+    }
+}
 int main()
 {
     std::cout << "建立本部地图\n";
     ben.BuildGraph(Benbu_Map,Suggest_Data);
     std::cout << "建立沙河地图\n";
     sha.BuildGraph(Shahe_Map,Suggest_Data);
-    for (;;)ben.John_Travel();
+    for (;;) {
+        std::cout << "请输入命令行进行操作,/help获取命令行提示" << std::endl;
+        std::string cmd;
+        cmd = GetS();
+        if (cmd == "/Setting") {
+            System_Setting();
+            std::cout << std::endl;
+        }
+        else if (cmd == "/getpath"){
+            FuzzyOutWay();
+            std::cout << std::endl;
+        }
+        else if (cmd == "/getTSP") {
+            FuzzyTSP();
+            std::cout << std::endl;
+        }
+        else if (cmd == "/simulate") {
+            SimulatePath();
+            std::cout << std::endl;
+        }
+        else if (cmd == "/help") {
+            std::cout << "/simulate 模拟路径" << std::endl;
+            std::cout << "/getpath 最短路查询" << std::endl;
+            std::cout << "/getTSP 途径多点最短路查询" << std::endl;
+            std::cout << "/Setting 设置交通工具和查询方式" << std::endl;
+            std::cout << std::endl;
+        }
+        else {
+            std::cout <<"未知命令行，请重新输入"<< std::endl;
+        }
+    }
     //int x, y;
     //std::cin>>x>>y;
     //b.OutWay(y,x);

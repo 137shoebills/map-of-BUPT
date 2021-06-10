@@ -31,7 +31,8 @@ private:
 	bool* TSPf;//tsp搜索过程中是否遍历某点
 	struct Suggest* su;//联想词组
 	int sugn;//联想词组数目
-	Person john;
+	double map_sca;//地图比例尺：1比map_sca米
+	Person john;//模拟运动的人
 	std::priority_queue< pa, std::vector< pa >, std::greater< pa > >q;
 	double GetDistance(double x,double y,double xx,double yy);//求两点直线距离
 	void Init(int x,int y,double vv);//建立一条双向边
@@ -52,17 +53,16 @@ public:
 	//在b字符串中查找子序列a，查找到则返回1，否则返回0.
 	void ClearOutWay();
 	//清晰查询路径
-	int FuzzyStart();
-	int FuzzyEnd();
-	//模糊查询起点和终点
-	void Search();
-	//读入一个字符串，输出搜索到的地名
+	int FuzzyStart(); //模糊查询起点
+	int FuzzyEnd(); //模糊查询终点
+	void Search(); //读入一个字符串，输出搜索到的地名
 	std::string GetName(int i);
 	//返回一个点的名称
 	void OutNeighbor(int x,int length);
 	//输出一个地点的临近地点
 	void SimJohn(int rt, int ed);//模拟行进过程（在john_travel里调用）
 	void John_Travel();//模拟设置
+	void Change_Edge(int state);//按照状态改变边权值
 };
 
 bool Cmp1(Point x,Point y);//先统计横边上的点排序

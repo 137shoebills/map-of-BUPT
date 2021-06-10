@@ -37,10 +37,12 @@ MapGraph::~MapGraph() {
 void MapGraph::Init(int x, int y,double vv) {
 	Edge* nod = new Edge;
 	nod->y = y; nod->next = head[x]; nod->val = vv;
+	nod->defau = vv;
 	head[x] = nod;
 	//std::cout << head[x]->y << std::endl;
 	nod = new Edge;
 	nod->y = x; nod->next = head[y]; nod->val = vv;
+	nod->defau = vv;
 	head[y] = nod;
 }
 double MapGraph::GetDistance(double x, double y, double xx, double yy){
@@ -50,7 +52,7 @@ double MapGraph::GetDistance(double x, double y, double xx, double yy){
 }
 void MapGraph::GetHead(int n) {
 	head = new Edge * [n+10];
-	for (int i = 1; i <= n; ++i)head[i] = NULL;
+	for (int i = 0; i < n; ++i)head[i] = NULL;
 	dis = new double[n + 10];
 	las = new int[n + 10];
 	nex = new int[n + 10];
@@ -68,7 +70,7 @@ int MapGraph::GetPoint(int rd1, int rd2, int typ, double x, double y){
 	PointSiz++;
 	return PointSiz-1;
 }
-void MapGraph::BuildGraph(std::string mapname,std::string sugname) {
+void MapGraph::BuildGraph(std::string mapname, std::string sugname) {
 	/*int n,x,y,m;
 	std::cin >> n>>m;
 	PointSiz = n;
@@ -82,14 +84,21 @@ void MapGraph::BuildGraph(std::string mapname,std::string sugname) {
 		double vv = getDistance(a[x].cdx,a[x].cdy,a[y].cdx,a[y].cdy);
 		Init(x,y,vv);
 	}*/
-	std::ifstream mapin;
-	std::ifstream sugin;
+	std::ifstream mapin;//地图文件
+	std::ifstream sugin;//联想词文件
 	mapin.open(mapname.c_str());
 	sugin.open(sugname.c_str());
-	if (!mapin)return ;
-	if (!sugin)return;
+	if (!mapin) { 
+		std::cout <<"建图失败，地图文件不存在。\n"<< std::endl;
+		return;
+	}
+	if (!sugin) {
+		std::cout << "建图失败，联想词文件不存在。\n" << std::endl;
+		return;
+	}
+
 	sugn = 0;
-	sugin >> sugn;
+	sugin >> sugn;//读入联想词
 	su = new Suggest[sugn+10];
 	for (int i = 0; i < sugn; ++i) {
 		std::string sugs, sugp;
@@ -97,13 +106,19 @@ void MapGraph::BuildGraph(std::string mapname,std::string sugname) {
 		su[i].source = sugs;
 		su[i].sug = sugp;
 	}
-	int n1, n2, m,y1,y2,x1,x2;
+
+	int n1, n2, m;
+	double y1, y2, x1, x2;
+	mapin >> map_sca;
 	mapin >> n2;
 	rds[1] = new Road[n2 + 10];
 	rdn[1] = n2;
 	for (int i = 0; i < n2; ++i) {//读入竖着的道路
 		int t;//id
-		mapin >> x1 >> y1 >> y2 >> t;
+		mapin >> x1 >> y1 >> y2 >> t >> rds[1][i].Bike_Pass >> rds[1][i].Crowd;
+		x1 *= map_sca;
+		y2 *= map_sca;
+		y1 *= map_sca;
 		rds[1][i].y1 = y1;
 		rds[1][i].y2 = y2;
 		rds[1][i].x1 = x1;
@@ -115,7 +130,10 @@ void MapGraph::BuildGraph(std::string mapname,std::string sugname) {
 	rdn[0] = n1;
 	for (int i = 0;i<n1; ++i) {//读入横着的道路
 		int t;//id
-		mapin >> y1 >> x1 >> x2 >> t;
+		mapin >> y1 >> x1 >> x2 >> t >> rds[0][i].Bike_Pass >> rds[0][i].Crowd;
+		x1 *= map_sca;
+		x2 *= map_sca;
+		y1 *= map_sca;
 		rds[0][i].x1 = x1;
 		rds[0][i].x2 = x2;
 		rds[0][i].y1 = y1;
@@ -146,7 +164,7 @@ void MapGraph::BuildGraph(std::string mapname,std::string sugname) {
 			arch[i].id[j] = id-1;
 			arch[i].type[j] = type ^ 1;
 			arch[i].side[j] = side;
-			arch[i].ct[j] = ct;
+			arch[i].ct[j] = ct * map_sca;
 		}n4 += q;
 	}
 	int n3=0;//n3为路口的个数
@@ -190,19 +208,23 @@ void MapGraph::BuildGraph(std::string mapname,std::string sugname) {
 			if (arch[i].type[j] == 0) {
 				zz = GetPoint(id, -1, 1, arch[i].ct[j], rds[0][id].y1);
 				if (arch[i].side[j] == 0) {
-					if(!MakeCP("南门",a[zz].name))a[zz].name = arch[i].name + "南门";
+					if (!MakeCP("门", arch[i].name) && (!MakeCP("站", arch[i].name)))a[zz].name = arch[i].name + "南门";
+					else a[zz].name = arch[i].name;
 				}
 				else {
-					if (!MakeCP("北门", a[zz].name))a[zz].name = arch[i].name + "北门";
+					if (!MakeCP("门", arch[i].name)&& (!MakeCP("站", arch[i].name)))a[zz].name = arch[i].name + "北门";
+					else a[zz].name = arch[i].name;
 				}//std::cout << a[zz].name << zz << std::endl;
 			}
 			else { 
 				zz = GetPoint(-1, id, 1, rds[1][id].x1, arch[i].ct[j]); 
 				if (arch[i].side[j] == 0) {
-					if (!MakeCP("东门", a[zz].name))a[zz].name = arch[i].name + "东门";
+					if (!MakeCP("门", arch[i].name)&& (!MakeCP("站", arch[i].name)))a[zz].name = arch[i].name + "东门";
+					else a[zz].name = arch[i].name;
 				}
 				else {
-					if (!MakeCP("西门", a[zz].name))a[zz].name = arch[i].name + "西门";
+					if (!MakeCP("门", arch[i].name)&& (!MakeCP("站", arch[i].name)))a[zz].name = arch[i].name + "西门";
+					else a[zz].name = arch[i].name;
 				}//std::cout << a[zz].name << zz << std::endl;
 			}
 		}
@@ -225,7 +247,7 @@ void MapGraph::BuildGraph(std::string mapname,std::string sugname) {
 	}
 	std::sort(a.begin(), a.end(), Cmp3);
 	mapin.close();
-	std::cout<< "建图成功" << std::endl;
+	std::cout<< "建图成功\n" << std::endl;
 }
 std::pair<int,int> MapGraph::GetType(int x) {
 	int type=0,num=0;
@@ -243,6 +265,7 @@ void MapGraph::Dijkstra(int rt) {
 		q.pop();
 		if (dis[x]!=0&&vv > dis[x])continue;
 		for (Edge *z = head[x]; z!=NULL; z = z->next) {
+			if (z->val == -1)continue;
 			if (disf[z->y]==0||dis[z->y] > dis[x] + z->val) {
 				dis[z->y] = dis[x] + z->val;
 				las[z->y] = x;
@@ -274,30 +297,32 @@ void MapGraph::TSPdfs(int k,int n,double v) {
 		}
 	}
 }
-int* MapGraph::TSP(int rt,int n,int p[]) {
-	TSPdis = new double*[n];
-	for (int i = 0;i<n; ++i) {
+int* MapGraph::TSP(int rt, int n, int p[]) {
+	TSPdis = new double* [n];
+	for (int i = 0; i < n; ++i) {
 		TSPdis[i] = new double[n];
 	}
 	TSPans = new int[n];
 	TSPway = new int[n];
 	TSPf = new bool[n];
 	TSPmin = 0;
+	TSPmin = 9999999999;
 	for (int i = 0; i < n; ++i) {
 		Dijkstra(p[i]);
 		for (int j = 0; j < n; ++j) {
+			if (!disf[p[j]])TSPdis[i][j] = 9999999999;
 			TSPdis[i][j] = GetDis(p[j]);
 		}
-		if(i!=n-1)TSPmin += TSPdis[i][i + 1];
 		TSPans[i] = i;
 	}Dijkstra(rt);
-	TSPmin += GetDis(p[0]);
 	for (int i = 0; i < n; ++i) {
 		TSPway[0] = i;
 		TSPf[i] = 1;
 		TSPdfs(1, n, GetDis(p[i]));
 		TSPf[i] = 0;
 	}
+	if (TSPmin == 9999999999) { TSPans[0] = -1; return TSPans; }
+
 	for (int i = 0; i < n; ++i)TSPans[i] = p[TSPans[i]];
 	
 	for (int i = 0; i < n; ++i) {
@@ -307,12 +332,23 @@ int* MapGraph::TSP(int rt,int n,int p[]) {
 	delete TSPf;
 	return TSPans;
 }
-void MapGraph::OutWay(int rt,int x) {
+void MapGraph::OutWay(int rt, int x) {
 	Dijkstra(rt);
 	//std::cout << a[rt].rd[0]+1 << ' ' << a[rt].rd[1]+1 << std::endl;
 	//std::cout << a[x].rd[0]+1 << ' ' << a[x].rd[1]+1 << std::endl;
-	if (disf[x])std::cout << "两地之间距离为:" << dis[x] << std::endl;
-	else std::cout << "两地点不连通" << std::endl;
+	if (disf[x]) {
+		if (System_State == 0 || System_State == 2) {
+			std::cout << "两地之间距离为:" << dis[x] << "米" << std::endl;
+			std::cout << "前往目标地点所需时间为:" << dis[x] / System_Velo << "秒" << std::endl;
+		}
+		else {
+			std::cout << "前往目标地点所需时间为:" << dis[x] / System_Velo << "秒" << std::endl;
+		}
+	}
+	else { 
+		std::cout << "两地点不连通" << std::endl;
+		return; 
+	}
 	for (int i = x; i != rt; i = las[i]) {
 		nex[las[i]] = i;
 	}
@@ -581,60 +617,12 @@ void MapGraph::OutNeighbor(int x, int length) {
 }
 void MapGraph::SimJohn(int rt, int ed) {
 	std::cout << "模拟开始" << std::endl;
+	john.timer.Stop();
 	john.timer.Start(john.scale);
 	double loc = 0;
 	char ch = ' ';
 	john.x = a[rt].cdx; john.y = a[rt].cdy;
 	for (int i = rt; i != ed; i = nex[i]) {
-		double disnow = loc + john.velo * (double)john.timer.Show() / 1000.0;
-		//std::cout << john.timer.Show() << std::endl;
-		john.p[0] = i, john.p[1] = nex[i];
-		while (disnow <= (double)dis[nex[i]]) {
-
-			john.x = a[i].cdx;
-			john.y = a[i].cdy;
-			if (a[i].rd[0] != -1 && a[i].rd[0] == a[nex[i]].rd[0]) {
-				if (a[i].cdx < a[nex[i]].cdx)john.x += disnow - dis[i];
-				else john.x -= disnow - dis[i];
-			}
-			else {
-				if (a[i].cdy < a[nex[i]].cdy)john.y += disnow - dis[i];
-				else john.y -= disnow - dis[i];
-			}
-			if (_kbhit()) {
-				ch = _getch();
-				if (ch == 's') {
-					john.timer.Stop();
-					loc = disnow;
-					//std::cout << disnow <<' '<< dis[ed] << std::endl;
-					std::cout << "暂停模拟，继续模拟输入'k'，退出当前路径模拟输入'q'，更改时间比例尺并继续模拟输入'c'" << std::endl;
-					std::string ss = GetS();
-					while (ss != "q" && ss != "k" && ss != "c") {
-						std::cout << "请重新输入命令符，继续模拟输入'k'，退出当前路径模拟输入'q'，更改时间比例尺并继续模拟输入'c'" << std::endl;
-						ss = GetS();
-					}
-					if (ss == "q") {
-						john.p[0] = john.p[1] = i;
-						john.x = a[i].cdx;
-						john.y = a[i].cdy;
-						return;
-					}
-					else if (ss == "c") {
-						std::cout << "请输入时间比例尺" << std::endl;
-						john.scale = GetDouble();
-						if (john.scale<0) {
-							std::cout << "请重新输入时间比例尺（比例尺需要大于0）" << std::endl;
-							john.scale = GetDouble();
-						}
-						john.timer.Start(john.scale);
-					}
-					else if(ss=="k") john.timer.Start(john.scale);
-				}
-			}
-			Sleep(5);
-			disnow = loc + john.velo * (double)john.timer.Show() / 1000.0;
-		}
-		john.x = a[nex[i]].cdx; john.y = a[nex[i]].cdy;
 		if (a[i].type == 0) {
 			std::cout << "经过路口，该路口是横向路 " << a[i].rd[0] + 1 << " 和纵向路 " << a[i].rd[1] + 1 << " 的交叉口,";
 			if (i == rt) {
@@ -701,6 +689,66 @@ void MapGraph::SimJohn(int rt, int ed) {
 				//std::cout << a[i].cdx<<a[i].cdy << std::endl;
 			}
 		}
+		double disnow = loc + john.velo * (double)john.timer.Show() / 1000.0;
+		//std::cout << john.timer.Show() << std::endl;
+		john.p[0] = i, john.p[1] = nex[i];
+		while (disnow <= (double)dis[nex[i]]) {
+
+			john.x = a[i].cdx;
+			john.y = a[i].cdy;
+			if (a[i].rd[0] != -1 && a[i].rd[0] == a[nex[i]].rd[0]) {
+				if (a[i].cdx < a[nex[i]].cdx)john.x += disnow - dis[i];
+				else john.x -= disnow - dis[i];
+			}
+			else {
+				if (a[i].cdy < a[nex[i]].cdy)john.y += disnow - dis[i];
+				else john.y -= disnow - dis[i];
+			}
+			if (_kbhit()) {
+				ch = _getch();
+				if (ch == 's') {
+					john.timer.Stop();
+					loc = disnow;
+					//std::cout << disnow <<' '<< dis[ed] << std::endl;
+					std::cout << "暂停模拟，继续模拟输入'k'，退出当前路径模拟输入'q'，更改时间比例尺并继续模拟输入'c',输出附近地点输入'n'" << std::endl;
+					std::string ss = GetS();
+					while (ss != "q" && ss != "k" && ss != "c" && ss != "n") {
+						std::cout << "请重新输入命令符，继续模拟输入'k'，退出当前路径模拟输入'q'，更改时间比例尺并继续模拟输入'c'" << std::endl;
+						ss = GetS();
+					}
+					if (ss == "q") {
+						john.p[0] = john.p[1] = i;
+						john.x = a[i].cdx;
+						john.y = a[i].cdy;
+						return;
+					}
+					else if (ss == "c") {
+						std::cout << "请输入时间比例尺" << std::endl;
+						john.scale = GetDouble();
+						if (john.scale<0) {
+							std::cout << "请重新输入时间比例尺（比例尺需要大于0）" << std::endl;
+							john.scale = GetDouble();
+						}
+						john.timer.Start(john.scale);
+					}
+					else if(ss=="k") john.timer.Start(john.scale);
+					else if (ss == "n") {
+						std::cout << "请输入查询的半径长度（单位：米）" << std::endl;
+						int rr = GetInt();
+						if (john.scale < 0) {
+							std::cout << "请重新输入半径（半径需要大于0）" << std::endl;
+							rr = GetInt();
+						}
+						OutNeighbor(i,rr);
+						Dijkstra(rt);
+						john.timer.Start(john.scale);
+					}
+				}
+			}
+			Sleep(5);
+			disnow = loc + john.velo * (double)john.timer.Show() / 1000.0;
+		}
+		john.x = a[nex[i]].cdx; john.y = a[nex[i]].cdy;
 	}
 	if (a[ed].type == 0) {
 		std::cout << "到达横向路 " << a[ed].rd[0] + 1 << " 和纵向路 " << a[ed].rd[1] + 1 << " 的交叉口" << std::endl;
@@ -708,6 +756,7 @@ void MapGraph::SimJohn(int rt, int ed) {
 	else {
 		std::cout << "到达" << a[ed].name << std::endl;
 	}
+	john.timer.Stop();
 	std::cout << "路径模拟停止" << std::endl;
 	std::cout << std::endl;
 	john.p[0] = john.p[1] = ed;
@@ -715,14 +764,7 @@ void MapGraph::SimJohn(int rt, int ed) {
 	john.y = a[ed].cdy;
 }
 void MapGraph::John_Travel() {
-	std::cout<<"请输入一个数字表示模拟速度(单位：m/s)"<<std::endl;
-	john.velo = GetDouble();
-	while(john.velo <= 0) {
-		std::cout << "请输入一个数字表示模拟速度(单位：m/s),速度需大于0" << std::endl;
-		john.velo = GetDouble();
-	}
-	std::cout << std::endl;
-
+	john.velo = System_Velo;
 	std::cout << "请输入一个数字表示时间缩放比例尺（大于0的整数或小数）" << std::endl;
 	john.scale = GetDouble();
 	while (john.scale <= 0) {
@@ -747,8 +789,8 @@ void MapGraph::John_Travel() {
 	for (int i = ed; i != rt; i = las[i]) {
 		nex[las[i]] = i;
 	}
+	SimJohn(rt, ed);
 	while (1) {
-		SimJohn(rt, ed);
 		std::cout << "是否重新选取目的地，y(是)/n（否）" << std::endl;
 		std::string ss = GetS();
 		while (ss != "y" && ss != "n") {
@@ -768,6 +810,31 @@ void MapGraph::John_Travel() {
 			std::cout << "模拟结束" << std::endl;
 			std::cout << std::endl;
 			return;
+		}
+	}
+}
+void MapGraph::Change_Edge(int state) {
+	for (int i = 0; i < PointSiz; ++i) {
+		for (Edge* j = head[i]; j != NULL; j = j->next) {
+			//std::cout << i << ' ' << j << std::endl;
+			if (state == 1) {
+				if (a[i].rd[0] != -1 && a[i].rd[0] == a[j->y].rd[0])
+					j->val = j->defau / rds[0][a[i].rd[0]].Crowd;
+				else
+					j->val = j->defau / rds[1][a[i].rd[1]].Crowd;
+			}
+			else if (state == 2) {
+				j->val = j->defau;
+				if (a[i].rd[0] != -1 && a[i].rd[0] == a[j->y].rd[0]) {
+					if (rds[0][a[i].rd[0]].Bike_Pass == 0)j->val = -1;
+				}
+				else {
+					if (rds[1][a[i].rd[1]].Bike_Pass == 0)j->val = -1;
+				}
+			}
+			else {
+				j->val = j->defau;
+			}//std::cout << 111 << std::endl;
 		}
 	}
 }
