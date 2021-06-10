@@ -61,8 +61,8 @@ public:
 	//返回一个点的名称
 	void OutNeighbor(int x,int length);
 	//输出一个地点的临近地点
-	void SimJohn(int rt,int ed);//模拟行进过程
-	void John_Travel();
+	void SimJohn(int rt, int ed);//模拟行进过程（在john_travel里调用）
+	void John_Travel();//模拟设置
 };
 
 bool Cmp1(Point x,Point y);//先统计横边上的点排序

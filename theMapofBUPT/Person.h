@@ -1,6 +1,6 @@
 #pragma 
 #include "MyAddition.h"
-class Person{
+class Person{//模拟运动的人的数据
 public:
 	Timer timer;
 	double scale;
